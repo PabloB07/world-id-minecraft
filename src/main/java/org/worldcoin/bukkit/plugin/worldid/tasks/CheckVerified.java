@@ -18,25 +18,34 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.model.user.User;
+import org.worldcoin.bukkit.plugin.worldid.utils.ColorUtils;
 
 public class CheckVerified extends BukkitRunnable {
 
-    private WorldId plugin = WorldId.getPlugin(WorldId.class);
+    private final WorldId plugin = WorldId.getPlugin(WorldId.class);
 
     private final Player player;
     private final String webUrl;
     private int counter;
 
-    private FileConfiguration config = plugin.getConfig();
-    private String orbGroupName = config.getString("orb-group-name");
-    private String deviceGroupName = config.getString("device-group-name");
-    private String baseUrl = config.getString("web-url");
+    private final FileConfiguration config = plugin.getConfig();
+
+    private final String verifySuccess = config.getString("messages.verify-success");
+    private final String verifyFailed = config.getString("messages.verify-failure");
+    private final String verifyError = config.getString("messages.verify-error");
+
+    private final String verifyLevel = config.getString("messages.verify-level");
+    private final String verifyInvalid = config.getString("messages.verify-invalid");
+
+    private final String orbGroupName = config.getString("orb-group-name");
+    private final String deviceGroupName = config.getString("device-group-name");
 
     PostHog posthog = new PostHog.Builder(WorldId.POSTHOG_API_KEY).host(WorldId.POSTHOG_HOST).build();
 
     public CheckVerified(Player player, UUID uuid, int counter) {
         this.player = player;
-        this.webUrl = baseUrl+"/api/isVerified?id="+uuid;
+        String baseUrl = config.getString("web-url");
+        this.webUrl = baseUrl +"/api/isVerified?id="+uuid;
         if (counter <= 0) {
             throw new IllegalArgumentException("counter must be greater than 0");
         } else {
@@ -64,20 +73,19 @@ public class CheckVerified extends BukkitRunnable {
                                 case "device":
                                     groupName = deviceGroupName;
                                     if (groupName == null) {
-                                        player.sendMessage("This Verification Level is not accepted.");
+                                        player.sendMessage(ColorUtils.colorize(verifyLevel));
                                         CheckVerified.this.cancel();
                                         return false;
                                     }
                                     break;
                                 default:
                                     groupName = null;
-                                    player.sendMessage("Invalid Verification Level.");
-                                    CheckVerified.this.cancel();
+                                    player.sendMessage(ColorUtils.colorize(verifyInvalid));
                                     return false;
                             }
 
                             if (player.hasPermission("group." + groupName)) {
-                                throw new IllegalStateException("player is already verified");
+                                throw new IllegalStateException("Player is already verified.");
                             }
 
                             final LuckPerms api = LuckPermsProvider.get();
@@ -86,7 +94,7 @@ public class CheckVerified extends BukkitRunnable {
                             user.data().add(node);
                             user.setPrimaryGroup(groupName);
                             api.getUserManager().saveUser(user);
-                            player.sendMessage("You've successfully verified with World ID!");
+                            player.sendMessage(ColorUtils.colorize(verifySuccess));
                             posthog.capture(player.getUniqueId().toString(), "minecraft integration verification", new HashMap<String, Object>() {
                                 {
                                   put("verification_level", verification_level);
@@ -101,13 +109,13 @@ public class CheckVerified extends BukkitRunnable {
                     }
                 });
             } catch (Exception e) {
-                player.sendMessage("Error while verifying with World ID: ", e.toString());
+                player.sendMessage(ColorUtils.colorize(verifyError + e.getMessage()));
                 this.cancel();
             } finally {
                 counter--;
             }   
         } else {
-            player.sendMessage("Timed out waiting for verification. Please try again.");
+            player.sendMessage(ColorUtils.colorize(verifyFailed));
             this.cancel();
         }
     }
