@@ -6,7 +6,7 @@
 
     <groupId>org.worldcoin.bukkit.plugin</groupId>
     <artifactId>worldid</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
@@ -17,6 +17,10 @@
         <repository>
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 

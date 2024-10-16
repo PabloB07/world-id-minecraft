@@ -5,9 +5,8 @@ orb-group-name: "orb-humans"
 device-group-name: "device-humans"
 web-url: "https://minecraft.worldcoin.org"
 
-# Messages with Hex colors. use with this format: <#FF6600> </#FF6600> or <&a> </&a>
-# example using Hex Colors foo: <#FF6600>foo</#FF6600>
-# example using Hex Color bar: <&a>bar</&a>
+# Messages with Hex colors. use with this format:
+# example using Hex Colors: &#FF6600foo
 messages:
     verify-success: "&aYou've successfully verified with World ID!"
     verify-error: "&cError while verifying with World ID. Please try again."
@@ -16,10 +15,12 @@ messages:
     verify-level: "&4This Verification Level is not accepted."
     verify-invalid: "&4Invalid Verification Level."
     verify-click-here: "&f&lClick here to verify with World ID: &r"
-    verify-now: "<#05F511>&lVerify me NOW!</#05F511>"
+    verify-now: "&#05F511&lVerify me NOW!"
+
+    config-reloaded: "&#cc44ffConfig reloaded successfully."
 
 listener-messages:
-    welcome-msg: "&aWelcome to the server now using WorldID!"
+    welcome-msg: "&#2b2b2bWelcome to the server now using WorldID!"
     verify-welcome-msg: "&aYou've been verified with World ID!"
     verify-to-msg: "&eYou haven't been verified with World ID!"
     verify-msg: "&bYou can get permissions by typing the `/verify` command to verify with World ID!"

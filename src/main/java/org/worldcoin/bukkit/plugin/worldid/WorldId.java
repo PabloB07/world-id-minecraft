@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.worldcoin.bukkit.plugin.worldid.commands.ReloadConfig;
 import org.worldcoin.bukkit.plugin.worldid.commands.VerifyCommand;
 import org.worldcoin.bukkit.plugin.worldid.event.JoinListener;
 import com.posthog.java.PostHog;
@@ -49,6 +50,7 @@ public class WorldId extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        reloadConfig();
         saveDefaultConfig();
         if (getConfig().getString("server-uuid").equals("")) {
             getConfig().set("server-uuid", UUID.randomUUID().toString());
@@ -67,6 +69,7 @@ public class WorldId extends JavaPlugin {
         } else {
             getLogger().info("Plugin enabled.");
             getCommand("verify").setExecutor(new VerifyCommand());
+            getCommand("reload").setExecutor(new ReloadConfig());
             getLogger().info("Added the 'verify' command.");
             new JoinListener(this);
             getLogger().info("Listening for player joins.");

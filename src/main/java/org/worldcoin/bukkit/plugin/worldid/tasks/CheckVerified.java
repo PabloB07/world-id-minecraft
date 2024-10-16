@@ -57,55 +57,51 @@ public class CheckVerified extends BukkitRunnable {
     public void run() {
         if (counter > 0) { 
             try {
-                Request.get(webUrl).execute().handleResponse(new HttpClientResponseHandler<Boolean>() {
-                    @Override
-                    public Boolean handleResponse(final ClassicHttpResponse response) throws IOException {
-                        final int status = response.getCode();
+                Request.get(webUrl).execute().handleResponse(response -> {
+                    final int status = response.getCode();
 
-                        if (status == 200) {
-                            String verification_level = new String(response.getEntity().getContent().readAllBytes());
-                            String groupName;
-                            
-                            switch (verification_level) {
-                                case "orb":
-                                    groupName = orbGroupName.isBlank() ? deviceGroupName : orbGroupName;
-                                    break;
-                                case "device":
-                                    groupName = deviceGroupName;
-                                    if (groupName == null) {
-                                        player.sendMessage(ColorUtils.colorize(verifyLevel));
-                                        CheckVerified.this.cancel();
-                                        return false;
-                                    }
-                                    break;
-                                default:
-                                    groupName = null;
-                                    player.sendMessage(ColorUtils.colorize(verifyInvalid));
+                    if (status == 200) {
+                        String verification_level = new String(response.getEntity().getContent().readAllBytes());
+                        String groupName;
+
+                        switch (verification_level) {
+                            case "orb":
+                                groupName = orbGroupName.isBlank() ? deviceGroupName : orbGroupName;
+                                break;
+                            case "device":
+                                groupName = deviceGroupName;
+                                if (groupName == null) {
+                                    player.sendMessage(ColorUtils.colorize(verifyLevel));
+                                    CheckVerified.this.cancel();
                                     return false;
-                            }
-
-                            if (player.hasPermission("group." + groupName)) {
-                                throw new IllegalStateException("Player is already verified.");
-                            }
-
-                            final LuckPerms api = LuckPermsProvider.get();
-                            final User user = api.getPlayerAdapter(Player.class).getUser(player);
-                            final InheritanceNode node = InheritanceNode.builder(groupName).value(true).build();
-                            user.data().add(node);
-                            user.setPrimaryGroup(groupName);
-                            api.getUserManager().saveUser(user);
-                            player.sendMessage(ColorUtils.colorize(verifySuccess));
-                            posthog.capture(player.getUniqueId().toString(), "minecraft integration verification", new HashMap<String, Object>() {
-                                {
-                                  put("verification_level", verification_level);
-                                  put("server_uuid", config.getString("server-uuid"));
                                 }
-                            });
-                            CheckVerified.this.cancel();
-                            return true;
-                        } else {
-                            return false;
+                                break;
+                            default:
+                                player.sendMessage(ColorUtils.colorize(verifyInvalid));
+                                return false;
                         }
+
+                        if (player.hasPermission("group." + groupName)) {
+                            throw new IllegalStateException("Player is already verified.");
+                        }
+
+                        final LuckPerms api = LuckPermsProvider.get();
+                        final User user = api.getPlayerAdapter(Player.class).getUser(player);
+                        final InheritanceNode node = InheritanceNode.builder(groupName).value(true).build();
+                        user.data().add(node);
+                        user.setPrimaryGroup(groupName);
+                        api.getUserManager().saveUser(user);
+                        player.sendMessage(ColorUtils.colorize(verifySuccess));
+                        posthog.capture(player.getUniqueId().toString(), "minecraft integration verification", new HashMap<String, Object>() {
+                            {
+                              put("verification_level", verification_level);
+                              put("server_uuid", config.getString("server-uuid"));
+                            }
+                        });
+                        CheckVerified.this.cancel();
+                        return true;
+                    } else {
+                        return false;
                     }
                 });
             } catch (Exception e) {

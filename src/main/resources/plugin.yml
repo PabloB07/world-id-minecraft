@@ -1,7 +1,9 @@
 name: WorldId
 authors: [Penryn]
+contributors: [xGamerscL]
+description: A plugin that grants you permissions when you verify with World ID.
 website: worldcoin.org
-version: 0.1.1
+version: 0.1.2
 api-version: 1.20
 main: org.worldcoin.bukkit.plugin.worldid.WorldId
 prefix: "World ID"
@@ -10,3 +12,5 @@ depend: [LuckPerms]
 commands:
   verify:
     description: Verifies you're a unique human and grants you permissions!
+  reload:
+    description: Reloads the config file
